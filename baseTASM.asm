@@ -1,0 +1,15 @@
+.MODEL SMALL
+.STACK 100H
+.DATA
+
+    DADOS DB    10,?,10 DUP(?)
+
+.CODE
+START:
+    MOV AX,@DATA
+    MOV DS, AX
+
+    MOV AX, 4C00h
+    INT 21h
+
+END START
