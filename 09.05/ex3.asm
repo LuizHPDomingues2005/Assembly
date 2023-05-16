@@ -1,7 +1,7 @@
-; manipulando memoria de video
-; 0B800h -> Endereco de memoria de video
-; WORD   -> parte baixa caracter a ser escrito
-;        -> parte alta atributo do caracter(cor exemplo)
+; Leitura do teclado nao blocante usando
+; a int 21h funcao AH 06h e DL=0FFh
+;
+;
 
 .MODEL SMALL
 .STACK 100h
@@ -9,51 +9,51 @@
 
 .CODE
 START:
-    ; acessando memoria de video do DOS
-    MOV AX, 0B800h ; -> endereco de memoria de video
+    ; inicializar o registrador ES com o endereco do video 
+    MOV AX, 0B800h ; 
     MOV ES, AX
-    ; usarmos o registrador DI como ponteiro para as posicoes
-    ; da memeoria de video
-    XOR DI, DI ; zera o ponteiro da memoria de video ES:DI
-    ; lembrando na memoria de video
-    ; AH -> atributo do caracter
-    ; AL -> caracter
-    MOV SI, 240 ; na terceira linha
-    MOV AX, 042Ah
 
-INICIO:
-    MOV AH, 04h    
-    ; DI com valor 0 coordenada 0,0
-    ; se uma linha tem 80 caracteres por exemplo para a linha 1
-    ; devemos colocar DI em que valor?
-    ; DI = DI + 80 * 2
-    MOV DI, SI
-    MOV [ES]:DI, AX
+
+    XOR DI, DI 
+
+    MOV AH, 4 
+    MOV AL, "C" ; coloca o valor a ser mostrado (caracter a ser exibido)
+    MOV [ES]:DI, AX ; move para a posicao de memoria ES:DI
+    ADD DI, 2
+    MOV AH, 1 ; muda atributo do caracter (blue)
+    MOV AL, "1" ; coloca o valor a ser mostrado (caracter a ser exibido)
+    MOV [ES]:DI, AX ; move para a posicao de memoria ES:DI
     
-    ; ler dados do teclado sem ser auto blocante (programa para r
-    ; e esperar o digito)
-    MOV AH, 06h
-    MOV DL, 0FFh
-    INT 21h
-    ; se ZF set nenhum caracter foi caracter foi digitado]
-    ; se ZF clear (0) caracter digitado e valor em AL
-        JZ INICIO
-    CMP AL, 'a'
-        JE INC_DI
-    CMP AL, 's'
-        JE DEC_DI
-    CMP AL, 01Bh ; compara se a tecla apertada é ESC para sair
-        JE FIM
-    JMP INICIO
+    ;; utilizando instrucoes mais complexas
+    ADD DI,2
+    MOV AH, 2
+    MOV AL, "*"
+    CLD
+    STOSW
+    STOSW
+    MOV AH, 5
+    MOV AL, "*"
+    MOV CX, 20 ; coloca o valor de 20 no registrador CX usado como contador
+    REP STOSW
 
-INC_DI:
-    ADD SI, 80
-    JMP INICIO
-DEC_DI:
-    SUB SI, 40
-    JMP INICIO
+    MOV AH, 3
+    MOV AL, "E"
+    MOV DI, 120
+    MOV CX, 20
+    REP STOSW
 
-FIM:
+    MOV AH, 4
+    MOV AL, "U"
+    MOV DI, 600
+    MOV CX, 20
+    REP STOSW
+
+    MOV AH, 2
+    MOV AL, "I"
+    MOV DI, 100
+    MOV CX, 20
+    REP STOSW
+
     MOV AX, 4C00h
     INT 21h
 
