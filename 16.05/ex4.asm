@@ -9,7 +9,7 @@
 
 .CODE
 START:
-    ; inicializar o registrador ES com o endereco do video 8B00h
+    ; inicializar o registrador ES com o endereco do video 
     MOV AX, 0B800h ; 
     MOV ES, AX
 
