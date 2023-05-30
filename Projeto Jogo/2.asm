@@ -14,6 +14,7 @@
 .CODE
 START:
 
+    MOV SI, 0
 LIMPAR_TELA:
   
     MOV CX, 0000
@@ -40,30 +41,27 @@ LIMPAR_TELA:
     ; AH -> ATRIBUTO DO CARACTER
     ; AL -> CARACTER.
 
-
+    MOV AX, 07DBh ; -> COR E CARACTER QUE FARAO A COBRA
     INT 10h
 
 GAME_LOOP:
-    XOR DI,DI
-    CALL DELAY ; DELAY IMPEDIRA QUE O JOGO FIQUE RAPIDO DEMAIS PARA SER JOGADO
-
     ; SE UMA LINHA TEM 80 CARACTERES POR EXEMPLO PARA A LINHA 1
     ; DEVEMOS COLOCAR DI EM QUE VALOR?
     ; DI = DI + 80 * 2
-
     MOV DI, SI
     MOV [ES]:DI, AX
 
-    CALL READ_BUFFER
-
+    ; LER DADOS DO TECLADO SEM SER AUTO BLOCANTE.
+    MOV AH, 01h ; Função 00h da interrupção 16h lê um caractere
+    INT 16h     ; Interrupção 16h para ler o caractere digitado
 
     ; SE ZF SET NENHUM CARACTER FOI DIGITADO
     ; SE ZF CLEAR (0) CARACTER DIGITADO E VALOR EM AL
-    JZ  DRAW_SNAKE
-
-    ; VERIFICAMOS QUAIS LETRAS PARA DIRECAO
-    ; QUE USAREMOS PARA MOVIMENTAR A COBRA
-    CMP AL, 'w' ; 
+    ;JZ  INICIO_1
+    MOV AX, 07DBh ; -> COR E CARACTER QUE FARAO A COBRA
+    INT 21h
+    
+    CMP AL, 'w'
         JE UP
     CMP AL, 'a'
         JE LEFT
@@ -95,12 +93,10 @@ LEFT:
     JMP GAME_LOOP
 
 
-DRAW_SNAKE:
+INICIO_1:
     ;MOV AL, 0DBh
     MOV AX, 07DBh
     JMP GAME_LOOP
-    
-
 
 
 
@@ -110,46 +106,6 @@ DRAW_SNAKE:
 FIM: ; fim do programa
     MOV AX, 4C00h
     INT 21h
-
-; =============================================== PROCEDIMENTOS ===========================================================
-
-INIT_SCREEN PROC
-    MOV AH, 0
-    MOV AL, 12h
-    INT 10h
-    RET
-ENDP
-
-
-
-
-
-DELAY PROC
-    XOR DX, DX
-    MOV CX, 65535
-
-DELAYLOOP:
-
-	CMP DX, CX
-	    LOOP DELAYLOOP
-	
-	RET
-	
-ENDP
-
-
-
-
-
-READ_BUFFER PROC
-
-    MOV AH, 01H
-    INT 16H
-
-
-    RET
-
-ENDP
 
 
 
