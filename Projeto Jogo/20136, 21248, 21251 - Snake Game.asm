@@ -10,28 +10,33 @@
 .MODEL SMALL
 .STACK 100h
 .DATA
-
+    gameMsg DB "     SNAKE GAME", 0AH, 0AH, 0AH, "    PRESSIONE UM CARACTER PARA JOGAR",13,10,"$"
 .CODE
 START:
 
-LIMPAR_TELA:
-  
-    MOV CX, 0000
-    MOV DX, 184Fh
-    INT 10h
-
-    MOV AH, 02
-    MOV BH, 00
-    INT 10h
-
-
     
+    CALL INIT_SCREEN ; LIMPAMOS A TELA PARA INICIAR O JOGO
+
+
+
+
+
+    ; TESTE MSG INICIO DE GAME ==================
+    ;MOV AH, 09h
+    ;MOV DX, OFFSET gameMsg
+    ;INT 21h
+
+    ;JMP FIM
+    ; ======================================
+
+
 
 
 
     ; INICIALIZAR O REGISTRADOR ES COM O ENDERECO DO VIDEO B800h
     MOV AX, 0B800h ; -> endereco de memoria de video
     MOV ES, AX
+
 
     XOR DI, DI ; -> ZERAMOS O PONTEIRO DAS 
                ;    POSICOES DA MEMORIA DE VIDEO
@@ -41,10 +46,10 @@ LIMPAR_TELA:
     ; AL -> CARACTER.
 
 
-    INT 10h
+
 
 GAME_LOOP:
-    XOR DI,DI
+    ;XOR DI,DI
     CALL DELAY ; DELAY IMPEDIRA QUE O JOGO FIQUE RAPIDO DEMAIS PARA SER JOGADO
 
     ; SE UMA LINHA TEM 80 CARACTERES POR EXEMPLO PARA A LINHA 1
@@ -54,8 +59,9 @@ GAME_LOOP:
     MOV DI, SI
     MOV [ES]:DI, AX
 
-    CALL READ_BUFFER
-
+    ;CALL READ_BUFFER
+MOV AH, 06H
+    INT 21H
 
     ; SE ZF SET NENHUM CARACTER FOI DIGITADO
     ; SE ZF CLEAR (0) CARACTER DIGITADO E VALOR EM AL
@@ -113,10 +119,15 @@ FIM: ; fim do programa
 
 ; =============================================== PROCEDIMENTOS ===========================================================
 
-INIT_SCREEN PROC
-    MOV AH, 0
-    MOV AL, 12h
+INIT_SCREEN PROC ; PROCEDIMENTO PARA LIMPAR A TELA
+    MOV CX, 0000
+    MOV DX, 184Fh
     INT 10h
+
+    MOV AH, 02
+    MOV BH, 00
+    INT 10h
+
     RET
 ENDP
 
@@ -124,16 +135,16 @@ ENDP
 
 
 
-DELAY PROC
+DELAY PROC ; PROCEDIMENTO DE DELAY PARA O JOGO
     XOR DX, DX
     MOV CX, 65535
 
-DELAYLOOP:
+    DELAYLOOP:
 
-	CMP DX, CX
-	    LOOP DELAYLOOP
-	
-	RET
+        CMP DX, CX
+            LOOP DELAYLOOP
+        
+        RET
 	
 ENDP
 
@@ -141,10 +152,14 @@ ENDP
 
 
 
-READ_BUFFER PROC
+READ_BUFFER PROC ; LER O TECALDO SEM SER AUTO BLOCANTE
 
-    MOV AH, 01H
-    INT 16H
+    ;XOR AH, AH
+    ;MOV AH, 01H
+    ;INT 16H
+
+    MOV AH, 06H
+    INT 21H
 
 
     RET

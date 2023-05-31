@@ -17,17 +17,8 @@ START:
     MOV SI, 0
 LIMPAR_TELA:
   
-    MOV CX, 0000
-    MOV DX, 184Fh
-    INT 10h
-
-    MOV AH, 02
-    MOV BH, 00
-    INT 10h
-
-
     
-
+    CALL INIT_SCREEN
 
 
     ; INICIALIZAR O REGISTRADOR ES COM O ENDERECO DO VIDEO B800h
@@ -45,52 +36,74 @@ LIMPAR_TELA:
     INT 10h
 
 GAME_LOOP:
+
+;READ_BUFFER:
+    ; LER DADOS DO TECLADO SEM SER AUTO BLOCANTE.
+ ;   MOV AH, 06h ; Função 00h da interrupção 16h lê um caractere
+  ;  MOV DL, 0FFH 
+   ; INT 21h     ; Interrupção 16h para ler o caractere digitado
+
+    CALL READ_BUFFER ; FARA A PRIMEIRA LEITURA
+
+DRAW_SNAKE:
+
     ; SE UMA LINHA TEM 80 CARACTERES POR EXEMPLO PARA A LINHA 1
     ; DEVEMOS COLOCAR DI EM QUE VALOR?
     ; DI = DI + 80 * 2
     MOV DI, SI
     MOV [ES]:DI, AX
 
-    ; LER DADOS DO TECLADO SEM SER AUTO BLOCANTE.
-    MOV AH, 01h ; Função 00h da interrupção 16h lê um caractere
-    INT 16h     ; Interrupção 16h para ler o caractere digitado
-
     ; SE ZF SET NENHUM CARACTER FOI DIGITADO
     ; SE ZF CLEAR (0) CARACTER DIGITADO E VALOR EM AL
-    ;JZ  INICIO_1
-    MOV AX, 07DBh ; -> COR E CARACTER QUE FARAO A COBRA
-    INT 21h
+    JZ  INICIO_1
+
+    CALL DELAY
+
+    CMP AL, 00h
+        JNE MOV_ALtoDL
+    CALL READ_BUFFER
+    JMP CHECK_PRESSED_KEYS
     
-    CMP AL, 'w'
+MOV_ALtoDL:
+    MOV DL, AL
+    XOR AH, AH
+
+CHECK_PRESSED_KEYS:
+    CMP DL, 'w'
         JE UP
-    CMP AL, 'a'
+    CMP DL, 'a'
         JE LEFT
-    CMP AL, 's'
+    CMP DL, 's'
         JE DOWN
-    CMP AL, 'd'
+    CMP DL, 'd'
         JE RIGHT        
 
+
+
     
-    CMP AL, 01BH  ; COMPARA SE DIGITOU ESC PARA SAIR
+    CMP DL, 01BH  ; COMPARA SE DIGITOU ESC PARA SAIR
         JE  FIM   ; SE DIGITOU ESC SAI DO JOGO
+
+    JMP DRAW_SNAKE
 
     JMP GAME_LOOP ; REPETE O JOGO
 
 UP:
     SUB SI, 80
-    JMP GAME_LOOP
+    JMP DRAW_SNAKE
 
 DOWN:
     ADD SI, 80
-    JMP GAME_LOOP
+    JMP DRAW_SNAKE
 
 RIGHT:
     INC SI
-    JMP GAME_LOOP
+    JMP DRAW_SNAKE
 
 LEFT:
     DEC SI
-    JMP GAME_LOOP
+    JMP DRAW_SNAKE
+
 
 
 INICIO_1:
@@ -107,6 +120,47 @@ FIM: ; fim do programa
     MOV AX, 4C00h
     INT 21h
 
+
+;============================ PROCEDIMENTOS =======================================================
+
+
+
+
+DELAY PROC ; PROCEDIMENTO DE DELAY PARA O JOGO
+    XOR DX, DX
+    MOV CX, 65535
+
+    DELAYLOOP:
+
+        CMP DX, CX
+            LOOP DELAYLOOP
+        
+        RET
+	
+ENDP
+
+INIT_SCREEN PROC
+
+    MOV CX, 0000
+    MOV DX, 184Fh
+    INT 10h
+
+    MOV AH, 02
+    MOV BH, 00
+    INT 10h
+    
+    RET
+
+ENDP
+
+READ_BUFFER PROC
+    ; LER DADOS DO TECLADO SEM SER AUTO BLOCANTE.
+    MOV AH, 06h ; Função 00h da interrupção 16h lê um caractere
+    MOV DL, 0FFH 
+    INT 21h     ; Interrupção 16h para ler o caractere digitado
+
+    RET
+ENDP
 
 
 END START
