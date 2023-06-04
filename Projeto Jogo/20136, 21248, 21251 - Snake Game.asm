@@ -11,6 +11,8 @@
 .DATA
     ; VARIAVEIS UTEIS PARA O FUNCIONAMENTO DO JOGO
     isGameOver DB 0
+    snakeSize  DB 0002h
+    snakeTail  DB (?)
 .CODE
 START:
     ; INICIALIZAR O REGISTRADOR ES COM O ENDERECO DO VIDEO B800h
@@ -23,6 +25,7 @@ START:
     XOR DI, DI ; -> ZERAMOS O PONTEIRO DAS 
                ;    POSICOES DA MEMORIA DE VIDEO
     XOR DX, DX ; ZERAMOS DX PARA VERIFICAR INICIO DO JOGO
+
     MOV isGameOver, 0 ; ZERAMOS A VARIAVEL QUE USAREMOS COMO BOOLEAN PARA SABER SE O JOGO ACABOU
 
 GAME_LOOP: ; ================================ GAME LOOP ==================================
@@ -36,6 +39,23 @@ GAME_LOOP: ; ================================ GAME LOOP ========================
 
     MOV DI, SI
     MOV [ES]:DI, AX
+
+    PUSH SI
+
+    CMP SP, 0h
+        JNE SNAKE_TAIL_REMOVE
+
+    JMP CONTINUE
+SNAKE_TAIL_REMOVE:
+    POP BX
+
+
+    MOV AX, 0000h
+
+    MOV DI, BX
+    MOV [ES]:DI, AX
+
+    JMP CONTINUE
 
 CONTINUE:
     ; CHAMAMOS O PROCEDIMENTO DE DELAY VARIAS VEZES
